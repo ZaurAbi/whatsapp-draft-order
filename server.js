@@ -7,10 +7,10 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// 🔧 ЗАМЕНИ на свои данные:
-const SHOPIFY_ACCESS_TOKEN = 'ТВОЙ_SHOPIFY_ACCESS_TOKEN';
-const SHOPIFY_STORE = 'tcczxm-uc.myshopify.com'; // БЕЗ https://
-const WHATSAPP_NUMBER = '994XXXXXXXXX'; // В международном формате, без плюса
+// ✅ Используем переменные окружения (без ошибок)
+const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN?.trim();
+const SHOPIFY_STORE = process.env.SHOPIFY_STORE?.trim();
+const WHATSAPP_NUMBER = process.env.WHATSAPP_NUMBER?.trim();
 
 app.post('/create-order', async (req, res) => {
   const lineItems = req.body.line_items;
@@ -33,6 +33,7 @@ app.post('/create-order', async (req, res) => {
       }
     );
 
+    // 🟢 Успешно отправлено в Shopify
     const itemsText = lineItems
       .map(i => `- Variant ID ${i.variant_id} x${i.quantity}`)
       .join('%0A');
@@ -42,7 +43,7 @@ app.post('/create-order', async (req, res) => {
 
     res.json({ success: true, whatsappUrl });
   } catch (err) {
-    console.error(err.response?.data || err.message);
+    console.error('❌ Shopify API Error:', err.response?.data || err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 });
